@@ -31,5 +31,12 @@ export default async function handler(request, response) {
     return;
   }
 
+  if (request.method === "DELETE") {
+    await Place.findByIdAndDelete(id);
+
+    response.status(200).json({ status: "Deleted Successfully" });
+    return;
+  }
+
   response.status(405).json({ status: "Method not allowed." });
 }
