@@ -1,5 +1,6 @@
 import dbConnect from "@/db/connect";
 import Place from "@/db/models/Place";
+import { Comment } from "@/db/models/Comment";
 
 export default async function handler(request, response) {
   await dbConnect();
@@ -32,10 +33,16 @@ export default async function handler(request, response) {
   }
 
   if (request.method === "DELETE") {
-    await Place.findByIdAndDelete(id);
+    const deletedPlace = await Place.findByIdAndDelete(id);
+    if (!deletedPlace) {
+      return response.status(404).json({ error: "Place not found" });
+    }
 
-    response.status(200).json({ status: "Deleted Successfully" });
-    return;
+    await Comment.deleteMany({ placeId: id });
+
+    return response.status(200).json({
+      status: `Place ${id} and associated comments deleted`,
+    });
   }
 
   response.status(405).json({ status: "Method not allowed." });

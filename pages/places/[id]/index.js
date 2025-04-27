@@ -79,6 +79,17 @@ export default function DetailsPage() {
           Delete
         </StyledButton>
       </ButtonContainer>
+
+      <CommentsContainer>
+        <Comments locationName={place.name} id={id} />
+      </CommentsContainer>
     </>
   );
 }
+
+const CommentsContainer = styled.div`
+  margin-top: 2rem;
+  width: 100%;
+  border-top: 1px solid #ccc;
+  padding-top: 2rem;
+`;

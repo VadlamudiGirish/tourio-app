@@ -35,11 +35,37 @@ export default function Comments({ locationName }) {
 
   async function handleSubmitComment(event) {
     event.preventDefault();
-    console.log("adding comment");
+    const formData = new FormData(event.target);
+    const commentData = Object.fromEntries(formData);
+
+    try {
+      await fetch(`/api/comments/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(commentData),
+      });
+      mutate();
+      event.target.reset();
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+    }
   }
 
   async function handleDeleteComment(comment_id) {
-    console.log("deleting comment");
+    try {
+      const response = await fetch(`/api/comments/${comment_id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete comment");
+      }
+
+      mutate();
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
   }
 
   return (
@@ -54,21 +80,21 @@ export default function Comments({ locationName }) {
       {comments && (
         <>
           <h2>{comments.length} fans commented on this place:</h2>
-          {comments.map(({ _id, name, comment }) => {
-            return (
-              <Fragment key={_id}>
-                <CommentText>
-                  <small>
-                    <strong>{name}</strong> commented on {locationName}
-                  </small>
-                </CommentText>
-                <span>{comment}</span>
-                <StyledButton onClick={() => handleDeleteComment(_id)}>
-                  X
-                </StyledButton>
-              </Fragment>
-            );
-          })}
+          {comments.map(({ _id, name, comment, createdAt }) => (
+            <Fragment key={_id}>
+              <CommentText>
+                <small>
+                  <strong>{name}</strong> commented on {locationName}
+                  <br />
+                  {new Date(createdAt).toLocaleDateString()}
+                </small>
+              </CommentText>
+              <span>{comment}</span>
+              <StyledButton onClick={() => handleDeleteComment(_id)}>
+                X
+              </StyledButton>
+            </Fragment>
+          ))}
         </>
       )}
     </Article>
